@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:open.jackyun.com)",
+      "WebSearch",
+      "PowerShell(pip install *)",
+      "PowerShell(nslookup *)",
+      "PowerShell(python jackyun_order_sync.py 2>&1)",
+      "PowerShell(python D:\\\\code\\\\pr_1\\\\sales_order_wide_table.py)",
+      "PowerShell(py *)",
+      "PowerShell(python -m pip install requests pandas)",
+      "PowerShell(& \"C:\\\\Users\\\\Lenovo\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.exe\" --version)",
+      "PowerShell(& \"C:\\\\Users\\\\Lenovo\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.exe\" -m pip install requests pandas)",
+      "PowerShell(& \"C:\\\\Users\\\\Lenovo\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python312\\\\python.exe\" -m venv \"D:\\\\code\\\\pr_1\\\\.venv\" --clear)",
+      "PowerShell(& \"D:\\\\code\\\\pr_1\\\\.venv\\\\Scripts\\\\python.exe\" -m pip install requests pandas)",
+      "PowerShell(& \"D:\\\\code\\\\pr_1\\\\.venv\\\\Scripts\\\\python.exe\" \"D:\\\\code\\\\pr_1\\\\sales_order_wide_table.py\")",
+      "PowerShell($env:PYTHONIOENCODING=\"utf-8\"; & \"D:\\\\code\\\\pr_1\\\\.venv\\\\Scripts\\\\python.exe\" \"D:\\\\code\\\\pr_1\\\\sales_order_wide_table.py\" 2>&1)"
+    ]
+  }
+}
