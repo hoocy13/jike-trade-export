@@ -1,8 +1,9 @@
 # 虚拟环境
 .venv/
 
-# 输出文件
-sales_order_wide_table.csv
+# 数据输出
+data/*.csv
+data/*.xlsx
 
 # IDE
 .idea/
@@ -11,5 +12,5 @@ sales_order_wide_table.csv
 __pycache__/
 *.pyc
 
-# 敏感配置（如需提交，用 .env.example 替代）
-# .env
+# 临时文件
+*.tmp
