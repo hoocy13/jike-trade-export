@@ -1,0 +1,20 @@
+﻿curl ^"https://env3.jkyservice.com/jkyun/erp-stock/warehouseStock/allStockSkuList^" ^
+  -H ^"accept: text/plain, */*; q=0.01^" ^
+  -H ^"accept-language: zh-CN,zh;q=0.9,ko;q=0.8,en;q=0.7^" ^
+  -H ^"ati: 7945980718676^" ^
+  -H ^"authorization: Bearer 52D035D3F3F3EAF5660F6CCED97493952395088AFD7422CC602F02C77481FD90^" ^
+  -H ^"content-type: application/x-www-form-urlencoded; charset=UTF-8^" ^
+  -b ^"_ati=7945980718676; 3AB9D23F7A4B3C9B=QWS2V7QH7FJQ4JMJ7GME6OSCROXHV2273ED2ZXSTI3W2KWLE54QYFMOA4WDO27J3PJSA77MVDVV24XSKRRSE6Z4VMM; group=c001; canaryFlag=null; canaries=null; 3AB9D23F7A4B3CSS=jdd03QWS2V7QH7FJQ4JMJ7GME6OSCROXHV2273ED2ZXSTI3W2KWLE54QYFMOA4WDO27J3PJSA77MVDVV24XSKRRSE6Z4VMMAAAAM7ICHNULIAAAAACTRAGVDPZOOG64X; tfstk=gm-iVOfX8F7_PlVEqSSs8n20Mk0L5GsfFIEAMiCq865BWZBA_e0D_dq9WZBxmsAR9hC9BGRDmK5C6thjCZRHTKKvWZn1novWidIv3nB2mBsNlFCA6sjDhQDKw0nJCdsf8bh-2yqwIyIfgmIqJMJTy2Ltw0nJQ9DlWOlJkK_3dt6V0O5Vg9khHtI4QZRVTwWPe5SV0IkhTTBYbSSVQ9oFC65V0iR2LvXfTOSV0IJEKtMtdP5J0U-EwFWd0AQgBsWGS_JN_dp9Yv__5dfH23-FIpfyQ0r40HXGSHK4UOXFWEJ5Phpjmks9EeSFedigxgJNECCpa0rhYppeMaTIGuQBtnbDbNwqa_7cse-N--r2dpfGuEAisP1wWBb5LwymV9dRTdtw-xNeQQCGb97K4YvFueK1PhhUjg8WBGL2G4UCjK8Nxgka8zuwXo6EHH4blNWCK_FE2-PUUpaD-vD3yK_NdT1-Kv4blNWCK_HnKzKf7965w; token=52D035D3F3F3EAF5660F6CCED97493952395088AFD7422CC602F02C77481FD90^" ^
+  -H ^"module_code: total_stock^" ^
+  -H ^"origin: https://env3.jkyservice.com^" ^
+  -H ^"priority: u=1, i^" ^
+  -H ^"referer: https://env3.jkyservice.com/erp_stock/goods_stock/total_stock_main_v3.html?mode=sku^&_t=476742^&_winid=w4503^" ^
+  -H ^"sec-ch-ua: ^\^"Google Chrome^\^";v=^\^"149^\^", ^\^"Chromium^\^";v=^\^"149^\^", ^\^"Not)A;Brand^\^";v=^\^"24^\^"^" ^
+  -H ^"sec-ch-ua-mobile: ?0^" ^
+  -H ^"sec-ch-ua-platform: ^\^"Windows^\^"^" ^
+  -H ^"sec-fetch-dest: empty^" ^
+  -H ^"sec-fetch-mode: cors^" ^
+  -H ^"sec-fetch-site: same-origin^" ^
+  -H ^"user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36^" ^
+  -H ^"x-requested-with: XMLHttpRequest^" ^
+  --data-raw ^"timestamp=1783561069842^&access_token=Bearer 52D035D3F3F3EAF5660F6CCED97493952395088AFD7422CC602F02C77481FD90^&appkey=jackyun_web_browser_2024^&sign=67FC11768282CACC2AE77CEAD6159E69^&searchNoType=goodsNo^&searchNos=^&warehouseGroupName=^&warehouseId=^&cateIds=^&goodsName=^&goodsNo=^&skuName=^&skuBarcode=^&assistBarcode=^&unitName=^&brandIds=^&vendIds=^&defaultVendIds=^&flagData=^&lowOrHigh=^&goodsAttrs=^&ownerName=^&dataShop=^&pageIndex=0^&pageSize=50^&sortField=^&sortOrder=^&cols=^%^5B^%^22warehouseName^%^22^%^2C^%^22goodsNo^%^22^%^2C^%^22goodsName^%^22^%^2C^%^22skuName^%^22^%^2C^%^22skuBarcode^%^22^%^2C^%^22brandName^%^22^%^2C^%^22currentQuantity^%^22^%^2C^%^22lockingQuantity^%^22^%^2C^%^22canUseQuantity^%^22^%^2C^%^22orderingQuantity^%^22^%^2C^%^22orderAbleQuantity^%^22^%^2C^%^22salesReturnQuantity^%^22^%^2C^%^22distrubuteQuantity^%^22^%^2C^%^22yesterdayQuantity^%^22^%^2C^%^22weekQuantity^%^22^%^2C^%^22threedayQuantity^%^22^%^2C^%^22shelfLifeStr^%^22^%^2C^%^22stockInQuantity^%^22^%^2C^%^22stockOutQuantity^%^22^%^2C^%^22price1^%^22^%^2C^%^22price3^%^22^%^2C^%^22price6^%^22^%^2C^%^22price7^%^22^%^2C^%^22cateName^%^22^%^2C^%^22defectiveQuanity^%^22^%^2C^%^22warehouseId^%^22^%^2C^%^22goodsId^%^22^%^2C^%^22id^%^22^%^2C^%^22skuId^%^22^%^2C^%^22unitName^%^22^%^2C^%^22goodsAlias^%^22^%^2C^%^22totalSaleQuantity^%^22^%^2C^%^22warehouseIds^%^22^%^2C^%^22isBlockup^%^22^%^2C^%^22isStopSelling^%^22^%^2C^%^22isStopPurchasing^%^22^%^2C^%^22isBatchManagement^%^22^%^2C^%^22isSerialManagement^%^22^%^2C^%^22aduitStatus^%^22^%^2C^%^22warehouseTypeCode^%^22^%^2C^%^22isPositonStock^%^22^%^2C^%^22maxValue^%^22^%^2C^%^22minValue^%^22^%^5D^&serviceType=stock.search.v2^&searchType=1^&groupByGoods=^&isHideZeroQuantity=0^&isShowBlockup=0^&isHideStopSelling=^&isHideStopPurchasing=^&isPaidService=^&isHideVirtualWh=^"

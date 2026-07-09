@@ -29,7 +29,11 @@
       "Bash(mv sales_order_wide_table.csv data/sales_order.csv)",
       "Bash(git add *)",
       "Bash(git commit -m 'refactor: 项目结构重组，提取公共模块，新增库存查询脚本 *)",
-      "Bash(git config *)"
+      "Bash(git config *)",
+      "Bash(git push *)",
+      "Bash(powershell -Command \"Test-NetConnection 175.24.186.206 -Port 3306\")",
+      "Bash(python *)",
+      "Bash(/c/Users/WIN11/AppData/Local/Programs/Python/Launcher/py *)"
     ]
   }
 }

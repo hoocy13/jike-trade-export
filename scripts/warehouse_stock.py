@@ -11,7 +11,7 @@ from datetime import date
 import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from config import DB_CONFIG, REQUEST_INTERVAL
+from config import DB_CONFIG, REQUEST_INTERVAL, DATA_DIR
 from common import api_request, sleep_between_requests, init_database, write_to_mysql
 
 # ============================================================
@@ -20,7 +20,7 @@ from common import api_request, sleep_between_requests, init_database, write_to_
 METHOD = "erp-stock.stock.skulist"
 TABLE_NAME = "fencangkuchaxun"
 RUN_MODE = "import"
-OUTPUT_CSV = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "warehouse_stock.xlsx")
+OUTPUT_CSV = os.path.join(DATA_DIR, "warehouse_stock.xlsx")
 PAGE_SIZE = 200
 
 # 仓库编码列表（从 scripts/warehouse_list.py 获取）
@@ -170,11 +170,11 @@ def main():
     print(f"吉客云分仓库存查询工具  [模式: {RUN_MODE}]")
     print("=" * 60 + "\n")
 
-    print("[步骤 1] 初始化数据库...")
-    init_database(CREATE_TABLE_SQL, TABLE_NAME)
-
     if RUN_MODE == "import":
-        print(f"\n[步骤 2] 读取文件: {OUTPUT_CSV}")
+        print("[步骤 1/3] 初始化数据库...")
+        init_database(TABLE_NAME, CREATE_TABLE_SQL)
+
+        print(f"\n[步骤 2/3] 读取文件: {OUTPUT_CSV}")
         if OUTPUT_CSV.endswith('.xlsx'):
             df = pd.read_excel(OUTPUT_CSV)
         else:
@@ -183,21 +183,24 @@ def main():
         print(f"  列名：{list(df.columns)}")
         # 添加数据日期
         df["数据日期"] = date.today()
-        print(f"\n[步骤 3] 写入 MySQL...")
-        write_to_mysql(df, TABLE_NAME)
+
+        print(f"\n[步骤 3/3] 写入 MySQL（影子表原子切换）...")
+        write_to_mysql(df, TABLE_NAME, CREATE_TABLE_SQL)
     else:
-        print(f"\n[步骤 2/4] 获取库存数据...")
+        print(f"\n[步骤 1/3] 获取库存数据...")
         records = fetch_all_stock()
         if not records:
             print("未获取到数据")
             return
-        print(f"\n[步骤 3/4] 数据转换...")
+
+        print(f"\n[步骤 2/3] 数据转换...")
         df = convert_to_dataframe(records)
         print(f"  转换完成：{len(df)} 行, {len(df.columns)} 列")
         df.to_csv(OUTPUT_CSV, index=False, encoding="utf-8-sig")
-        print(f"\n[完成] CSV: {OUTPUT_CSV}")
-        print(f"\n[步骤 4/4] 写入 MySQL...")
-        write_to_mysql(df, TABLE_NAME)
+        print(f"  CSV 已保存: {OUTPUT_CSV}")
+
+        print(f"\n[步骤 3/3] 写入 MySQL（影子表原子切换）...")
+        write_to_mysql(df, TABLE_NAME, CREATE_TABLE_SQL)
 
     print(f"\n{'=' * 60}")
     print(f"全部完成！MySQL: {DB_CONFIG['database']}.{TABLE_NAME}")

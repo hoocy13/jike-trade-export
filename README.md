@@ -1,69 +1,129 @@
-# 吉客云数据导出工具集
+﻿# 吉客云 Web 导出同步脚本
 
-调用吉客云开放平台 API，自动获取业务数据并写入本地 MySQL 数据库。
+通过吉客云网页版导出任务获取数据，下载 xlsx 后写入 MySQL。当前脚本以 DolphinScheduler 部署为目标，同时保留 PyCharm 右键运行方式。
 
-## 包含脚本
+## 目录结构
 
-| 脚本 | API 方法 | 说明 |
-|------|----------|------|
-| `scripts/sales_order.py` | `oms.trade.fullinfoget` | 销售订单 + 货品明细宽表 |
-| `scripts/warehouse_stock.py` | `erp-stock.stock.skulist` | 分仓库存数据 |
-| `scripts/warehouse_list.py` | `erp.warehouse.get` | 仓库编码查询（辅助工具） |
+```text
+config.py
+common.py
+requirements.txt
+scripts/
+  销售单查询_web.py
+  销售单明细账_web.py
+  分仓库查询_web.py
+  总库存查询_web.py
+  渠道列表_web.py
+  warehouse_list.py
+data/
+  .gitkeep
+CLAUDE.md
+agent.md
+README.md
+```
 
-## 快速开始
+## 安装依赖
 
 ```bash
-# 1. 安装依赖
-pip install requests pandas pymysql numpy
-
-# 2. 修改配置（config.py 中的 APP_KEY、DB_CONFIG）
-
-# 3. 查询仓库编码
-python scripts/warehouse_list.py
-
-# 4. 销售单导出
-python scripts/sales_order.py
-
-# 5. 分仓库存导出
-python scripts/warehouse_stock.py
+pip install -r requirements.txt
 ```
 
-## 项目结构
+## 销售单同步
 
-```
-├── config.py              # 公共配置（APP_KEY、DB_CONFIG）
-├── common.py              # 公共工具（签名、请求、MySQL写入）
-├── scripts/               # 数据导出脚本
-├── docs/                  # 设计文档
-├── data/                  # CSV 输出目录
-├── CLAUDE.md              # 项目说明
-└── README.md              # 本文件
+脚本：
+
+```bash
+python scripts/销售单查询_web.py
 ```
 
-## 运行模式
+目标表：
 
-脚本顶部 `RUN_MODE` 参数：
-
-- `"full"` — API → CSV → MySQL（完整流程）
-- `"import"` — CSV → MySQL（仅导入，跳过 API）
-
-## 数据库
-
-- MySQL 本地数据库：`dw_ods`
-- 销售单表：`dwd_sales_order_detail`（54 列，中文字段名）
-- 分仓库存表：`fencangkuchaxun`（32 列，中文字段名）
-
-## API 签名规则
-
-```
-签名原文 = secret + key1value1key2value2... + secret
-签名 = MD5(签名原文.lower())
+```text
+ods.销售单查询
 ```
 
-> 整个字符串必须转小写再 MD5（官方文档未说明，从签名工具反推）
+本地调试时，把 DevTools 复制的销售单查询 `queryList` 或 `startExcelExport` 完整 cURL 粘到脚本顶部 `START_EXPORT_CURL_TEXT`。
 
-## 限制说明
+## 分仓库存同步
 
-- 时间范围：单次查询不超过 7 天（脚本自动拆分并行）
-- 频率限制：1 次/秒（脚本设置 0.5 秒间隔）
-- 库存 API：每仓库最多返回 300 条（API 层面限制）
+脚本：
+
+```bash
+python scripts/分仓库查询_web.py
+```
+
+目标表：
+
+```text
+ods.分仓库查询
+```
+
+本地调试时，把 DevTools 复制的分仓库存查询 `stockSkuList` 或 `startExcelExport` 完整 cURL 粘到脚本顶部 `START_EXPORT_CURL_TEXT`。
+
+库存表写入是全量快照替换：先写临时表，再用 `RENAME TABLE` 原子切换。
+
+## 数据类型约定
+
+库存数量类字段使用 `DECIMAL(18,0)`；金额/价格类字段使用 `DECIMAL(18,2)`。
+
+`含税价`、`不含税价`、`当前成本价`、`库存金额` 保留 2 位小数。
+
+## 销售单明细账同步
+
+脚本：
+
+```bash
+python scripts/销售单明细账_web.py
+```
+
+目标表：
+
+```text
+ods.销售单明细账
+```
+
+本地调试时，把 DevTools 复制的销售单明细账 `tradeOrderDetialList` 或导出 `startExcelExport` 完整 cURL 粘到脚本顶部 `START_EXPORT_CURL_TEXT`。
+
+不传 `--start/--end` 时，默认同步当月 1 日 `00:00:00` 到今天 `23:59:59`。
+
+如果导出触发安全验证，需要重新复制带 `commonVerify` 的 cURL，或设置环境变量 `JKY_SALES_ORDER_DETAIL_COMMON_VERIFY`。
+
+## 渠道列表同步
+
+脚本：
+
+```bash
+python scripts/渠道列表_web.py
+```
+
+目标表：
+
+```text
+ods.渠道列表
+```
+
+本地调试时，把 DevTools 复制的 `getsaleschannelinfoforcols` 完整 cURL 粘到脚本顶部 `START_LIST_CURL_TEXT`。
+
+渠道列表是主数据，脚本会直接分页拉接口，并用全量快照替换写入 MySQL。
+
+## 总库存查询同步
+
+脚本：
+
+```bash
+python scripts/总库存查询_web.py
+```
+
+目标表：
+
+```text
+ods.总库存查询
+```
+
+本地调试时，把 DevTools 复制的 `allStockSkuList` 完整 cURL 粘到脚本顶部 `START_LIST_CURL_TEXT`。
+
+脚本会直接分页拉接口，并用全量快照替换写入 MySQL。数量类字段使用 `DECIMAL(18,0)`，价格类字段使用 `DECIMAL(18,2)`。
+
+## 清理约定
+
+`data/**/*.csv`、`data/**/*.xlsx`、`__pycache__/`、`.idea/`、`*.jar` 都不进入项目版本。

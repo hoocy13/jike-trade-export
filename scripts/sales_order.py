@@ -13,20 +13,21 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from config import DB_CONFIG, REQUEST_INTERVAL
+from config import DB_CONFIG, REQUEST_INTERVAL, DATA_DIR
 from common import generate_sign, build_params, init_database, write_to_mysql
 
 # ============================================================
 # 业务配置
 # ============================================================
 METHOD = "oms.trade.fullinfoget"
-TABLE_NAME = "dwd_sales_order_detail"
-RUN_MODE = "full"
-OUTPUT_CSV = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "sales_order.csv")
+TABLE_NAME = "xiaoshoudanchaxun"
+RUN_MODE = "full"         # import or full
+OUTPUT_CSV = os.path.join(DATA_DIR, "sales_order.csv")
 PAGE_SIZE = 200
 
-START_TRADE_TIME = "2026-06-01 00:00:00"
-END_TRADE_TIME = "2026-06-27 23:59:59"
+# 近1个月（动态计算，每次执行自动取最近30天）
+END_TRADE_TIME = datetime.now().strftime("%Y-%m-%d 23:59:59")
+START_TRADE_TIME = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d 00:00:00")
 
 # fields 参数：全量字段
 FIELDS = ",".join([
@@ -326,7 +327,8 @@ def map_to_table_fields(df: pd.DataFrame) -> pd.DataFrame:
     df["gross_profit_amount"] = df["share_favourable_after_fee"] - df["cost_amount"]
     df.loc[df["share_favourable_after_fee"].isna() | df["cost_amount"].isna(), "gross_profit_amount"] = None
     df["gross_profit_rate"] = df["gross_profit_amount"] / df["share_favourable_after_fee"].replace(0, np.nan)
-    df.loc[df["share_favourable_after_fee"].isna() | (df["share_favourable_after_fee"] == 0), "gross_profit_rate"] = None
+    df.loc[
+        df["share_favourable_after_fee"].isna() | (df["share_favourable_after_fee"] == 0), "gross_profit_rate"] = None
 
     # 6. 固定字段 + 清洗
     df["cost_note"] = "待确认"
@@ -336,7 +338,8 @@ def map_to_table_fields(df: pd.DataFrame) -> pd.DataFrame:
     # 7. sub_trade_id 兜底
     mask = df["sub_trade_id"].isna() | (df["sub_trade_id"].astype(str).str.strip() == "")
     df.loc[mask, "sub_trade_id"] = (
-        df.loc[mask, "trade_no"].astype(str) + "_" + df.loc[mask, "goods_no"].astype(str) + "_" + df.loc[mask].index.astype(str)
+            df.loc[mask, "trade_no"].astype(str) + "_" + df.loc[mask, "goods_no"].astype(str) + "_" + df.loc[
+        mask].index.astype(str)
     )
 
     # 8. 最终列顺序 + 中文列名
@@ -392,11 +395,11 @@ def main():
     print(f"吉客云销售订单大宽表导出工具  [模式: {RUN_MODE}]")
     print("=" * 60 + "\n")
 
-    print("[步骤 1] 初始化数据库...")
-    init_database(CREATE_TABLE_SQL, TABLE_NAME)
-
     if RUN_MODE == "import":
-        print(f"\n[步骤 2] 读取 CSV: {OUTPUT_CSV}")
+        print("[步骤 1/3] 初始化数据库...")
+        init_database(TABLE_NAME, CREATE_TABLE_SQL)
+
+        print(f"\n[步骤 2/3] 读取 CSV: {OUTPUT_CSV}")
         df = pd.read_csv(OUTPUT_CSV, low_memory=False)
         print(f"  读取完成：{len(df)} 行, {len(df.columns)} 列")
         for col in df.columns:
@@ -408,28 +411,32 @@ def main():
         mask = df["子订单ID"].str.strip() == ""
         if mask.any():
             df.loc[mask, "子订单ID"] = (
-                df.loc[mask, "订单编号"].astype(str) + "_" +
-                df.loc[mask, "货品编号"].astype(str) + "_" + df.loc[mask].index.astype(str)
+                    df.loc[mask, "订单编号"].astype(str) + "_" +
+                    df.loc[mask, "货品编号"].astype(str) + "_" + df.loc[mask].index.astype(str)
             )
             print(f"  补全 {mask.sum()} 条空子订单ID")
-        print(f"\n[步骤 3] 写入 MySQL...")
-        write_to_mysql(df, TABLE_NAME)
+
+        print(f"\n[步骤 3/3] 写入 MySQL（影子表原子切换）...")
+        write_to_mysql(df, TABLE_NAME, CREATE_TABLE_SQL)
     else:
-        print(f"\n[步骤 2/5] 获取 API 数据...")
+        print(f"\n[步骤 1/4] 获取 API 数据...")
         orders = fetch_all_orders()
         if not orders:
             print("未获取到数据")
             return
-        print(f"\n[步骤 3/5] 拍平订单数据...")
+
+        print(f"\n[步骤 2/4] 拍平订单数据...")
         df_raw = flatten_orders_to_wide_table(orders)
         print(f"  拍平完成：{len(df_raw)} 行, {len(df_raw.columns)} 列")
-        print(f"\n[步骤 4/5] 字段映射与指标计算...")
+
+        print(f"\n[步骤 3/4] 字段映射与指标计算...")
         df = map_to_table_fields(df_raw)
         print(f"  映射完成：{len(df)} 行, {len(df.columns)} 列")
         df.to_csv(OUTPUT_CSV, index=False, encoding="utf-8-sig")
-        print(f"\n[完成] CSV: {OUTPUT_CSV}")
-        print(f"\n[步骤 5/5] 写入 MySQL...")
-        write_to_mysql(df, TABLE_NAME)
+        print(f"  CSV 已保存: {OUTPUT_CSV}")
+
+        print(f"\n[步骤 4/4] 写入 MySQL（影子表原子切换）...")
+        write_to_mysql(df, TABLE_NAME, CREATE_TABLE_SQL)
 
     print(f"\n{'=' * 60}")
     print(f"全部完成！MySQL: {DB_CONFIG['database']}.{TABLE_NAME}")
